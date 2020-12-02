@@ -20,6 +20,13 @@ public struct H264Decoder {
     private var formatDescription: CMVideoFormatDescription?
     private var sps: VideoPacket?
     private var pps: VideoPacket?
+    private var decodeMode: DecodeMode
+    
+    // MARK: Lifecycle
+    
+    public init(by mode: DecodeMode = .CMSampleBuffer) {
+        decodeMode = mode
+    }
 
     // MARK: Public Function
     
