@@ -1,40 +1,59 @@
 //
 //  H264Decoder.swift
-//
+//  H264Decoder
 //
 //  Created by UnpxreTW on 2020/11/30.
 //  Copyright © 2020 UnpxreTW. All rights reserved.
 //
 
+import VideoToolbox
 import AVFoundation
 
 private typealias Byte = UInt8
 private typealias VideoPacket = Array<Byte>
 
-public struct H264Decoder {
+public class H264Decoder {
+
+    // MARK: Public Variable
+    
+    public weak var delegate: H264DecoderDelegate?
     
     // MARK: Private Variable
 
     private let startCode: Data = .init([0x00, 0x00, 0x00, 0x01])
-    private var sendNewFrame: ((CMSampleBuffer) -> Void)?
     private var formatDescription: CMVideoFormatDescription?
+    private var decompressionSession: VTDecompressionSession?
     private var sps: VideoPacket?
     private var pps: VideoPacket?
+    private var decodeMode: DecodeMode
+    private var tempChangeMode: DecodeMode?
+    
+    // MARK: Lifecycle
+    
+    public init(to mode: DecodeMode = .CMSampleBuffer) {
+        decodeMode = mode
+    }
 
     // MARK: Public Function
     
-    public mutating func qnqueue(_ data: Data) {
+    public func qnqueue(_ data: Data) {
         var data = data
         while var packet = findPacket(from: &data) {
             receivedRawVideoFrame(in: &packet)
         }
     }
-
-    public mutating func setHandler(_ handler: @escaping ((CMSampleBuffer) -> Void)) {
-        self.sendNewFrame = handler
+    
+    public func change(to mode: DecodeMode) {
+        tempChangeMode = mode
     }
 
     // MARK: Private Function
+    
+    private func decodeDone() {
+        guard let newMode = tempChangeMode else { return }
+        decodeMode = newMode
+        tempChangeMode = nil
+    }
 
     private func findPacket(from data: inout Data) -> VideoPacket? {
         var packet: VideoPacket?
@@ -50,7 +69,7 @@ public struct H264Decoder {
     }
 
     /// note: 對於 VideoToolBox 來說前四個位元並不是 StartCode 而應該為資料長度，所以需要手動填入。
-    private mutating func receivedRawVideoFrame(in videoPacket: inout VideoPacket) {
+    private func receivedRawVideoFrame(in videoPacket: inout VideoPacket) {
         guard videoPacket.count > 4 else { return }
         let start = 4
         var length = CFSwapInt32HostToBig(UInt32(videoPacket.count - start))
@@ -71,7 +90,7 @@ public struct H264Decoder {
 
     // FIXME: 強制解開 UnsafeBufferPointer.baseAddress 看起來不夠安全，
     //        雖然當 count > 0 時 baseAddress 不會是 nil 的。
-    private mutating func createFormatDescription() -> Bool {
+    private func createFormatDescription() -> Bool {
         if formatDescription != nil { formatDescription = nil }
         guard let sps = sps, let pps = pps else { return false }
         let parameterSizes = [sps.count, pps.count]
@@ -92,7 +111,29 @@ public struct H264Decoder {
                 }
             }
         }
-        return status == noErr
+        if case .CVPixelBuffer = decodeMode, let description = formatDescription {
+            if let session = decompressionSession {
+                VTDecompressionSessionInvalidate(session)
+            }
+            var _decompressionSession: VTDecompressionSession?
+            let decoderParameters = NSMutableDictionary()
+            let destinationPixelBufferAttributes = NSMutableDictionary()
+            destinationPixelBufferAttributes.setValue(
+                NSNumber(value: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange as UInt32),
+                forKey: kCVPixelBufferPixelFormatTypeKey as String)
+            let status = VTDecompressionSessionCreate(
+                allocator: kCFAllocatorDefault,
+                formatDescription: description,
+                decoderSpecification: decoderParameters,
+                imageBufferAttributes: destinationPixelBufferAttributes,
+                outputCallback: nil,
+                decompressionSessionOut: &_decompressionSession)
+            guard status == noErr else { return false }
+            self.decompressionSession = _decompressionSession
+            return true
+        } else {
+            return status == noErr
+        }
     }
 
     private func decode(_ packet: VideoPacket) {
@@ -131,6 +172,23 @@ public struct H264Decoder {
             unsafeBitCast(CFArrayGetValueAtIndex(_attachments, 0), to: CFMutableDictionary.self),
             Unmanaged.passUnretained(kCMSampleAttachmentKey_DisplayImmediately).toOpaque(),
             Unmanaged.passUnretained(kCFBooleanTrue).toOpaque())
-        sendNewFrame?(buffer)
+        if case .CMSampleBuffer = decodeMode {
+            delegate?.newFrame(self, decoded: buffer)
+        } else {
+            guard let session = decompressionSession else { return }
+            var flag: [VTDecodeInfoFlags] = [.asynchronous, .frameDropped, .imageBufferModifiable]
+            status = VTDecompressionSessionDecodeFrame(
+                session,
+                sampleBuffer: buffer,
+                flags: [._EnableTemporalProcessing],
+                infoFlagsOut: &flag
+            ) { [weak self] _, _, CVImageBuffer, _, _  in
+                guard let self = self else { return }
+                if status == noErr, let buffer = CVImageBuffer {
+                    self.delegate?.newFrame(self, decoded: buffer)
+                }
+            }
+        }
+        decodeDone()
     }
 }
