@@ -6,6 +6,7 @@
 //  Copyright © 2020 UnpxreTW. All rights reserved.
 //
 
+import VideoToolbox
 import AVFoundation
 
 private typealias Byte = UInt8
@@ -21,6 +22,7 @@ public class H264Decoder {
 
     private let startCode: Data = .init([0x00, 0x00, 0x00, 0x01])
     private var formatDescription: CMVideoFormatDescription?
+    private var decompressionSession: VTDecompressionSession?
     private var sps: VideoPacket?
     private var pps: VideoPacket?
     private var decodeMode: DecodeMode
@@ -98,7 +100,29 @@ public class H264Decoder {
                 }
             }
         }
-        return status == noErr
+        if case .CVPixelBuffer = decodeMode, let description = formatDescription {
+            if let session = decompressionSession {
+                VTDecompressionSessionInvalidate(session)
+            }
+            var _decompressionSession: VTDecompressionSession?
+            let decoderParameters = NSMutableDictionary()
+            let destinationPixelBufferAttributes = NSMutableDictionary()
+            destinationPixelBufferAttributes.setValue(
+                NSNumber(value: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange as UInt32),
+                forKey: kCVPixelBufferPixelFormatTypeKey as String)
+            let status = VTDecompressionSessionCreate(
+                allocator: kCFAllocatorDefault,
+                formatDescription: description,
+                decoderSpecification: decoderParameters,
+                imageBufferAttributes: destinationPixelBufferAttributes,
+                outputCallback: nil,
+                decompressionSessionOut: &_decompressionSession)
+            guard status == noErr else { return false }
+            self.decompressionSession = _decompressionSession
+            return true
+        } else {
+            return status == noErr
+        }
     }
 
     private func decode(_ packet: VideoPacket) {
@@ -139,6 +163,20 @@ public class H264Decoder {
             Unmanaged.passUnretained(kCFBooleanTrue).toOpaque())
         if case .CMSampleBuffer = decodeMode {
             delegate?.newFrame(self, decoded: buffer)
+        } else {
+            guard let session = decompressionSession else { return }
+            var flag: [VTDecodeInfoFlags] = [.asynchronous, .frameDropped, .imageBufferModifiable]
+            status = VTDecompressionSessionDecodeFrame(
+                session,
+                sampleBuffer: buffer,
+                flags: [._EnableTemporalProcessing],
+                infoFlagsOut: &flag
+            ) { [weak self] _, _, CVImageBuffer, _, _  in
+                guard let self = self else { return }
+                if status == noErr, let buffer = CVImageBuffer {
+                    self.delegate?.newFrame(self, decoded: buffer)
+                }
+            }
         }
     }
 }
