@@ -21,11 +21,17 @@ var decoder = H264Decoder(to: .CVPixelBuffer)
 
 - note: 只有與解碼器設定同一個模式的輸出才會被觸發。
 ```swift
-decoder.delegate = self
+class HandleClass: H264DecoderDelegate {
+    decoder.delegate = self
 
-func newFrame(_ decoder: H264Decoder, decoded frame: CMSampleBuffer)
+    func newFrame(_ decoder: H264Decoder, decoded frame: CMSampleBuffer) {
+        // do something
+    }
 
-func newFrame(_ decoder: H264Decoder, decoded frame: CVPixelBuffer)
+    func newFrame(_ decoder: H264Decoder, decoded frame: CVPixelBuffer) {
+        // do something
+    }
+}
 ```
 
 或是更改解碼模式
