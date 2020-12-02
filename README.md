@@ -28,7 +28,9 @@ func newFrame(_ decoder: H264Decoder, decoded frame: CMSampleBuffer)
 func newFrame(_ decoder: H264Decoder, decoded frame: CVPixelBuffer)
 ```
 
+或是更改解碼模式
 ```swift
+decoder.change(to: .CVPixelBuffer)
 ```
 
 3. 將 Raw H.264 Data 傳入 Decoder 實例進行解碼

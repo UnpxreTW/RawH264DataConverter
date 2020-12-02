@@ -26,6 +26,7 @@ public class H264Decoder {
     private var sps: VideoPacket?
     private var pps: VideoPacket?
     private var decodeMode: DecodeMode
+    private var tempChangeMode: DecodeMode?
     
     // MARK: Lifecycle
     
@@ -41,8 +42,18 @@ public class H264Decoder {
             receivedRawVideoFrame(in: &packet)
         }
     }
+    
+    public func change(to mode: DecodeMode) {
+        tempChangeMode = mode
+    }
 
     // MARK: Private Function
+    
+    private func decodeDone() {
+        guard let newMode = tempChangeMode else { return }
+        decodeMode = newMode
+        tempChangeMode = nil
+    }
 
     private func findPacket(from data: inout Data) -> VideoPacket? {
         var packet: VideoPacket?
@@ -178,5 +189,6 @@ public class H264Decoder {
                 }
             }
         }
+        decodeDone()
     }
 }
