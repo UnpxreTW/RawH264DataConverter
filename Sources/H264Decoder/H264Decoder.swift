@@ -11,12 +11,15 @@ import AVFoundation
 private typealias Byte = UInt8
 private typealias VideoPacket = Array<Byte>
 
-public struct H264Decoder {
+public class H264Decoder {
+
+    // MARK: Public Variable
+    
+    public weak var delegate: H264DecoderDelegate?
     
     // MARK: Private Variable
 
     private let startCode: Data = .init([0x00, 0x00, 0x00, 0x01])
-    private var sendNewFrame: ((CMSampleBuffer) -> Void)?
     private var formatDescription: CMVideoFormatDescription?
     private var sps: VideoPacket?
     private var pps: VideoPacket?
@@ -30,15 +33,11 @@ public struct H264Decoder {
 
     // MARK: Public Function
     
-    public mutating func qnqueue(_ data: Data) {
+    public func qnqueue(_ data: Data) {
         var data = data
         while var packet = findPacket(from: &data) {
             receivedRawVideoFrame(in: &packet)
         }
-    }
-
-    public mutating func setHandler(_ handler: @escaping ((CMSampleBuffer) -> Void)) {
-        self.sendNewFrame = handler
     }
 
     // MARK: Private Function
@@ -57,7 +56,7 @@ public struct H264Decoder {
     }
 
     /// note: 對於 VideoToolBox 來說前四個位元並不是 StartCode 而應該為資料長度，所以需要手動填入。
-    private mutating func receivedRawVideoFrame(in videoPacket: inout VideoPacket) {
+    private func receivedRawVideoFrame(in videoPacket: inout VideoPacket) {
         guard videoPacket.count > 4 else { return }
         let start = 4
         var length = CFSwapInt32HostToBig(UInt32(videoPacket.count - start))
@@ -78,7 +77,7 @@ public struct H264Decoder {
 
     // FIXME: 強制解開 UnsafeBufferPointer.baseAddress 看起來不夠安全，
     //        雖然當 count > 0 時 baseAddress 不會是 nil 的。
-    private mutating func createFormatDescription() -> Bool {
+    private func createFormatDescription() -> Bool {
         if formatDescription != nil { formatDescription = nil }
         guard let sps = sps, let pps = pps else { return false }
         let parameterSizes = [sps.count, pps.count]
@@ -138,6 +137,8 @@ public struct H264Decoder {
             unsafeBitCast(CFArrayGetValueAtIndex(_attachments, 0), to: CFMutableDictionary.self),
             Unmanaged.passUnretained(kCMSampleAttachmentKey_DisplayImmediately).toOpaque(),
             Unmanaged.passUnretained(kCFBooleanTrue).toOpaque())
-        sendNewFrame?(buffer)
+        if case .CMSampleBuffer = decodeMode {
+            delegate?.newFrame(self, decoded: buffer)
+        }
     }
 }
