@@ -29,7 +29,7 @@ public class H264Decoder {
     
     // MARK: Lifecycle
     
-    public init(by mode: DecodeMode = .CMSampleBuffer) {
+    public init(to mode: DecodeMode = .CMSampleBuffer) {
         decodeMode = mode
     }
 
