@@ -6,6 +6,7 @@
 //  Copyright © 2020 UnpxreTW. All rights reserved.
 //
 
+#if !os(watchOS)
 import VideoToolbox
 import AVFoundation
 
@@ -192,3 +193,4 @@ public class H264Decoder {
         decodeDone()
     }
 }
+#endif

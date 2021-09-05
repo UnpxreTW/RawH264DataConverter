@@ -6,6 +6,7 @@
 //  Copyright © 2020 UnpxreTW. All rights reserved.
 //
 
+#if !os(watchOS)
 import AVFoundation
 
 public protocol H264DecoderDelegate: AnyObject {
@@ -20,3 +21,4 @@ public extension H264DecoderDelegate {
     
     func newFrame(_ decoder: H264Decoder, decoded frame: CVPixelBuffer) {}
 }
+#endif
