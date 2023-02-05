@@ -2,23 +2,45 @@
 //  H264Decoder.swift
 //  H264Decoder
 //
-//  Created by UnpxreTW on 2020/11/30.
-//  Copyright © 2020 UnpxreTW. All rights reserved.
+//  Copyright © 2023 UnpxreTW. All rights reserved.
 //
 
 #if !os(watchOS)
-import VideoToolbox
 import AVFoundation
+import VideoToolbox
 
 private typealias Byte = UInt8
-private typealias VideoPacket = Array<Byte>
+private typealias VideoPacket = [Byte]
 
 public class H264Decoder {
 
+    // MARK: Lifecycle
+
+    public init(to mode: DecodeMode = .CMSampleBuffer) {
+        self.decodeMode = mode
+    }
+
+    // MARK: Public
+
     // MARK: Public Variable
-    
+
     public weak var delegate: H264DecoderDelegate?
-    
+
+    // MARK: Public Function
+
+    public func qnqueue(_ data: Data) {
+        var data = data
+        while var packet = findPacket(from: &data) {
+            receivedRawVideoFrame(in: &packet)
+        }
+    }
+
+    public func change(to mode: DecodeMode) {
+        tempChangeMode = mode
+    }
+
+    // MARK: Private
+
     // MARK: Private Variable
 
     private let startCode: Data = .init([0x00, 0x00, 0x00, 0x01])
@@ -28,28 +50,9 @@ public class H264Decoder {
     private var pps: VideoPacket?
     private var decodeMode: DecodeMode
     private var tempChangeMode: DecodeMode?
-    
-    // MARK: Lifecycle
-    
-    public init(to mode: DecodeMode = .CMSampleBuffer) {
-        decodeMode = mode
-    }
-
-    // MARK: Public Function
-    
-    public func qnqueue(_ data: Data) {
-        var data = data
-        while var packet = findPacket(from: &data) {
-            receivedRawVideoFrame(in: &packet)
-        }
-    }
-    
-    public func change(to mode: DecodeMode) {
-        tempChangeMode = mode
-    }
 
     // MARK: Private Function
-    
+
     private func decodeDone() {
         guard let newMode = tempChangeMode else { return }
         decodeMode = newMode
@@ -121,14 +124,16 @@ public class H264Decoder {
             let destinationPixelBufferAttributes = NSMutableDictionary()
             destinationPixelBufferAttributes.setValue(
                 NSNumber(value: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange as UInt32),
-                forKey: kCVPixelBufferPixelFormatTypeKey as String)
+                forKey: kCVPixelBufferPixelFormatTypeKey as String
+            )
             let status = VTDecompressionSessionCreate(
                 allocator: kCFAllocatorDefault,
                 formatDescription: description,
                 decoderSpecification: decoderParameters,
                 imageBufferAttributes: destinationPixelBufferAttributes,
                 outputCallback: nil,
-                decompressionSessionOut: &_decompressionSession)
+                decompressionSessionOut: &_decompressionSession
+            )
             guard status == noErr else { return false }
             self.decompressionSession = _decompressionSession
             return true
@@ -165,14 +170,16 @@ public class H264Decoder {
             sampleTimingArray: nil,
             sampleSizeEntryCount: 1,
             sampleSizeArray: sampleSizeArray,
-            sampleBufferOut: &sampleBuffer)
+            sampleBufferOut: &sampleBuffer
+        )
         guard status == kCMBlockBufferNoErr, let buffer = sampleBuffer else { return }
         let attachments = CMSampleBufferGetSampleAttachmentsArray(buffer, createIfNecessary: true)
         guard let _attachments = attachments else { return }
         CFDictionarySetValue(
             unsafeBitCast(CFArrayGetValueAtIndex(_attachments, 0), to: CFMutableDictionary.self),
             Unmanaged.passUnretained(kCMSampleAttachmentKey_DisplayImmediately).toOpaque(),
-            Unmanaged.passUnretained(kCFBooleanTrue).toOpaque())
+            Unmanaged.passUnretained(kCFBooleanTrue).toOpaque()
+        )
         if case .CMSampleBuffer = decodeMode {
             delegate?.newFrame(self, decoded: buffer)
         } else {
@@ -183,7 +190,7 @@ public class H264Decoder {
                 sampleBuffer: buffer,
                 flags: [._EnableTemporalProcessing],
                 infoFlagsOut: &flag
-            ) { [weak self] _, _, CVImageBuffer, _, _  in
+            ) { [weak self] _, _, CVImageBuffer, _, _ in
                 guard let self = self else { return }
                 if status == noErr, let buffer = CVImageBuffer {
                     self.delegate?.newFrame(self, decoded: buffer)
