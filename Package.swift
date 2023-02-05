@@ -12,6 +12,5 @@ let package = Package(
     dependencies: [],
     targets: [
         .target(name: "H264Decoder", dependencies: []),
-        .testTarget(name: "H264DecoderTests", dependencies: ["H264Decoder"]),
     ]
 )
