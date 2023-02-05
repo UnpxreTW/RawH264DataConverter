@@ -1,0 +1,79 @@
+--acronyms ID,URL,UUID
+--allman false
+--assetliterals actual-width
+--beforemarks struct,typealias
+--binarygrouping 4,8
+--categorymark "MARK: %c"
+--classthreshold 0
+--closingparen balanced
+--closurevoid remove
+--commas inline
+--conflictmarkers reject
+--decimalgrouping 3,6
+--elseposition same-line
+--emptybraces no-space
+--enumnamespaces always
+--enumthreshold 0
+--exponentcase lowercase
+--exponentgrouping disabled
+--extensionacl on-extension
+--extensionlength 0
+--extensionmark "MARK: - %t + %c"
+--fractiongrouping disabled
+--fragment false
+--funcattributes prev-line
+--generictypes 
+--groupedextension "MARK: - %c"
+--guardelse auto
+--hexgrouping 4,8
+--hexliteralcase uppercase
+--ifdef no-indent
+--importgrouping alpha
+--indent 4
+--indentcase false
+--indentstrings false
+--lifecycle viewDidAppear,viewDidLoad,viewWillAppear
+--lineaftermarks true
+--linebreaks lf
+--markcategories true
+--markextensions always
+--marktypes never
+--maxwidth 120
+--modifierorder 
+--nevertrailing 
+--nospaceoperators 
+--nowrapoperators 
+--octalgrouping 4,8
+--operatorfunc spaced
+--organizetypes actor,class,enum,struct
+--patternlet hoist
+--ranges spaced
+--redundanttype explicit
+--self init-only
+--selfrequired 
+--semicolons inline
+--shortoptionals always
+--smarttabs enabled
+--someAny true
+--stripunusedargs closure-only
+--structthreshold 0
+--tabwidth unspecified
+--trailingclosures 
+--trimwhitespace always
+--typeattributes prev-line
+--typeblanklines preserve
+--typemark "MARK: - %t"
+--varattributes prev-line
+--voidtype void
+--wraparguments preserve
+--wrapcollections before-first
+--wrapconditions preserve
+--wrapparameters before-first
+--wrapreturntype preserve
+--wrapternary default
+--wraptypealiases preserve
+--xcodeindentation disabled
+--yodaswap always
+--enable acronyms,markTypes,organizeDeclarations,wrapEnumCases
+--exclude BuildingTools
+--header "//\n//  {file}\n//  H264Decoder\n//\n//  Copyright © {created.year} UnpxreTW. All rights reserved.\n//"
