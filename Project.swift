@@ -13,7 +13,7 @@ let project = Project(
         .target(
             name: "SwiftH264Decoder",
             destinations: .iOS,
-            product: .app,
+            product: .framework,
             bundleId: "",
             infoPlist: nil,
             sources: ["Sources/**/*"],
