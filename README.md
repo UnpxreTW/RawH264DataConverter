@@ -2,44 +2,21 @@
 
 將 Raw H.264 Data 轉換為 CMSampleBuffer 或 CVPixelBuffer
 
-## 使用方式
+## 開發
 
-1. 建立 Decoder 實例
+建議使用 [Tuist](http://192.168.1.95/documentation/home/tuist) 產生的專案檔進行開發
 
-預設初始化解碼為 CMSampleBuffer：
-```swift
-var decoder = H264Decoder()
-```
-或是指定初始化格式：
-```swift
-var decoder = H264Decoder(to: .CVPixelBuffer)
-```
+> Note: 使用產生 Xcode 專案開發以包含 `SwiftLint` 與 `SwiftFormater` 等工具
 
-2. 設定解碼完成後輸出流
+使用指令產生專案檔以進行開發：
 
-使自己的類別繼承 `H264DecoderDelegate` 並設定 Decoder 的 `delegate` 並實作方法以得到解碼完後的輸出
-
-- note: 只有與解碼器設定同一個模式的輸出才會被觸發。
-```swift
-class HandleClass: H264DecoderDelegate {
-    decoder.delegate = self
-
-    func newFrame(_ decoder: H264Decoder, decoded frame: CMSampleBuffer) {
-        // do something
-    }
-
-    func newFrame(_ decoder: H264Decoder, decoded frame: CVPixelBuffer) {
-        // do something
-    }
-}
+```shell
+tuist generate
 ```
 
-或是更改解碼模式
-```swift
-decoder.change(to: .CVPixelBuffer)
-```
 
-3. 將 Raw H.264 Data 傳入 Decoder 實例進行解碼
-```swift
-decoder.qnqueue(<#T##Raw H.264 Data##Data#>)
-```
+> Note: 產生 Tuist 配置檔
+>
+> ```shell
+> tuist edit
+> ```
