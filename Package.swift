@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "H264Decoder",
+    name: "RawH264DataConverter",
     platforms: [.iOS(.v9), .macOS(.v10_11), .tvOS(.v11)],
     products: [
         .library(name: "H264Decoder", targets: ["H264Decoder"]),

@@ -1,6 +1,6 @@
 //
 //  Project.swift
-//  UnpxreTW/SwiftH264Decoder
+//  UnpxreTW/RawH264DataConverter
 //
 //  Copyright © 2024 UnpxreTW. All rights reserved.
 //
@@ -8,10 +8,10 @@
 import ProjectDescription
 
 let project = Project(
-	name: "SwiftH264Decoder",
+	name: "RawH264DataConverter",
 	targets: [
 		.target(
-			name: "SwiftH264Decoder",
+			name: "RawH264DataConverter",
 			destinations: .iOS,
 			product: .framework,
 			bundleId: "",
