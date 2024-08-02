@@ -7,17 +7,29 @@
 
 import ProjectDescription
 
+let target: Target = .target(
+	name: "RawH264DataConverter",
+	destinations: .iOS,
+	product: .framework,
+	bundleId: "",
+	infoPlist: nil,
+	sources: ["Sources/**/*"],
+	dependencies: [
+		.package(product: "SwiftLintBuildToolPlugin", type: .plugin)
+	]
+)
+
+let developmentTools: [Package] = [
+	.remote(
+		url: "https://github.com/SimplyDanny/SwiftLintPlugins.git",
+		requirement: .upToNextMajor(from: Version(0, 55, 0))
+	)
+]
+
 let project = Project(
 	name: "RawH264DataConverter",
+	packages: developmentTools,
 	targets: [
-		.target(
-			name: "RawH264DataConverter",
-			destinations: .iOS,
-			product: .framework,
-			bundleId: "",
-			infoPlist: nil,
-			sources: ["Sources/**/*"],
-			dependencies: []
-		)
+		target
 	]
 )

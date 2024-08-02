@@ -116,6 +116,7 @@ public class H264Decoder {
             if let session = decompressionSession {
                 VTDecompressionSessionInvalidate(session)
             }
+            // swiftlint:disable:next identifier_name
             var _decompressionSession: VTDecompressionSession?
             let decoderParameters = NSMutableDictionary()
             let destinationPixelBufferAttributes = NSMutableDictionary()
@@ -138,6 +139,7 @@ public class H264Decoder {
     }
 
     private func decode(_ packet: VideoPacket) {
+        // swiftlint:disable:next identifier_name
         var _packet = packet
         var blockBuffer: CMBlockBuffer?
         var status = _packet.withUnsafeMutableBytes { pointer in
@@ -168,6 +170,7 @@ public class H264Decoder {
             sampleBufferOut: &sampleBuffer)
         guard status == kCMBlockBufferNoErr, let buffer = sampleBuffer else { return }
         let attachments = CMSampleBufferGetSampleAttachmentsArray(buffer, createIfNecessary: true)
+        // swiftlint:disable:next identifier_name
         guard let _attachments = attachments else { return }
         CFDictionarySetValue(
             unsafeBitCast(CFArrayGetValueAtIndex(_attachments, 0), to: CFMutableDictionary.self),
