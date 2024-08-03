@@ -23,6 +23,10 @@ let developmentTools: [Package] = [
 	.remote(
 		url: "https://github.com/SimplyDanny/SwiftLintPlugins.git",
 		requirement: .upToNextMajor(from: Version(0, 55, 0))
+	),
+	.remote(
+		url: "https://github.com/UnpxreTW/SwiftFormat.git",
+		requirement: .branch("Unpxre")
 	)
 ]
 
