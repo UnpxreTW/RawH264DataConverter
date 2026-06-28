@@ -186,9 +186,9 @@ public class H264Decoder {
                 sampleBuffer: buffer,
                 flags: [._EnableTemporalProcessing],
                 infoFlagsOut: &flag
-            ) { [weak self] _, _, CVImageBuffer, _, _  in
+            ) { [weak self] decodeStatus, _, CVImageBuffer, _, _ in
                 guard let self = self else { return }
-                if status == noErr, let buffer = CVImageBuffer {
+                if decodeStatus == noErr, let buffer = CVImageBuffer {
                     self.delegate?.newFrame(self, decoded: buffer)
                 }
             }
