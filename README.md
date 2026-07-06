@@ -2,8 +2,6 @@
 
 將 Raw H.264 Data 轉換為 CMSampleBuffer 或 CVPixelBuffer
 
-> 狀態：Stable — 核心功能齊備、API 已定型。
-
 ## 開發
 
 建議使用 [Tuist](https://tuist.dev) 產生的專案檔進行開發
