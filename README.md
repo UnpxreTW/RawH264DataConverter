@@ -2,7 +2,7 @@
 
 將 Raw H.264 Data 轉換為 CMSampleBuffer 或 CVPixelBuffer
 
-> ⚠️ 狀態：Active WIP — 開發進行中，API 可能調整，測試與 CI 尚未補齊。
+> 狀態：Stable — 核心功能齊備、API 已定型。
 
 ## 開發
 
