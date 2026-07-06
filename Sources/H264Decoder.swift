@@ -89,22 +89,27 @@ public class H264Decoder {
         }
     }
 
-    // FIXME: 強制解開 UnsafeBufferPointer.baseAddress 看起來不夠安全，
-    //        雖然當 count > 0 時 baseAddress 不會是 nil 的。
     private func createFormatDescription() -> Bool {
         if formatDescription != nil { formatDescription = nil }
-        guard let sps = sps, let pps = pps else { return false }
+        guard let sps = sps, let pps = pps, !sps.isEmpty, !pps.isEmpty else { return false }
         let parameterSizes = [sps.count, pps.count]
         let status = sps.withUnsafeBufferPointer { spsPointer -> OSStatus in
-            pps.withUnsafeBufferPointer { ppsPointer in
-                let parameterSet = [spsPointer.baseAddress!, ppsPointer.baseAddress!]
-                return parameterSet.withUnsafeBufferPointer { parameterSetPointer in
-                    parameterSizes.withUnsafeBufferPointer { parameterSizesPointer in
-                        CMVideoFormatDescriptionCreateFromH264ParameterSets(
+            pps.withUnsafeBufferPointer { ppsPointer -> OSStatus in
+                guard let spsAddress = spsPointer.baseAddress, let ppsAddress = ppsPointer.baseAddress else {
+                    return kCMFormatDescriptionError_InvalidParameter
+                }
+                let parameterSet = [spsAddress, ppsAddress]
+                return parameterSet.withUnsafeBufferPointer { parameterSetPointer -> OSStatus in
+                    parameterSizes.withUnsafeBufferPointer { parameterSizesPointer -> OSStatus in
+                        guard let parameterSetAddress = parameterSetPointer.baseAddress,
+                              let parameterSizesAddress = parameterSizesPointer.baseAddress else {
+                            return kCMFormatDescriptionError_InvalidParameter
+                        }
+                        return CMVideoFormatDescriptionCreateFromH264ParameterSets(
                             allocator: kCFAllocatorDefault,
                             parameterSetCount: 2,
-                            parameterSetPointers: parameterSetPointer.baseAddress!,
-                            parameterSetSizes: parameterSizesPointer.baseAddress!,
+                            parameterSetPointers: parameterSetAddress,
+                            parameterSetSizes: parameterSizesAddress,
                             nalUnitHeaderLength: 4,
                             formatDescriptionOut: &formatDescription
                         )
@@ -139,28 +144,34 @@ public class H264Decoder {
     }
 
     private func decode(_ packet: VideoPacket) {
-        // swiftlint:disable:next identifier_name
-        var _packet = packet
         var blockBuffer: CMBlockBuffer?
-        var status = _packet.withUnsafeMutableBytes { pointer in
-            CMBlockBufferCreateWithMemoryBlock(
-                allocator: kCFAllocatorDefault,
-                memoryBlock: pointer.baseAddress,
-                blockLength: packet.count,
-                blockAllocator: kCFAllocatorNull,
-                customBlockSource: nil,
-                offsetToData: 0,
-                dataLength: packet.count,
-                flags: 0,
-                blockBufferOut: &blockBuffer
+        var status = CMBlockBufferCreateWithMemoryBlock(
+            allocator: kCFAllocatorDefault,
+            memoryBlock: nil,
+            blockLength: packet.count,
+            blockAllocator: kCFAllocatorDefault,
+            customBlockSource: nil,
+            offsetToData: 0,
+            dataLength: packet.count,
+            flags: kCMBlockBufferAssureMemoryNowFlag,
+            blockBufferOut: &blockBuffer
+        )
+        guard status == kCMBlockBufferNoErr, let ownedBlockBuffer = blockBuffer else { return }
+        status = packet.withUnsafeBytes { pointer -> OSStatus in
+            guard let baseAddress = pointer.baseAddress else { return kCMBlockBufferBadPointerParameterErr }
+            return CMBlockBufferReplaceDataBytes(
+                with: baseAddress,
+                blockBuffer: ownedBlockBuffer,
+                offsetIntoDestination: 0,
+                dataLength: packet.count
             )
         }
-        guard status == noErr else { return }
+        guard status == kCMBlockBufferNoErr else { return }
         var sampleBuffer: CMSampleBuffer?
         let sampleSizeArray = [packet.count]
         status = CMSampleBufferCreateReady(
             allocator: kCFAllocatorDefault,
-            dataBuffer: blockBuffer,
+            dataBuffer: ownedBlockBuffer,
             formatDescription: formatDescription,
             sampleCount: 1,
             sampleTimingEntryCount: 0,
