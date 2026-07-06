@@ -4,7 +4,7 @@
 
 ## 開發
 
-建議使用 [Tuist](http://192.168.1.95/documentation/home/tuist) 產生的專案檔進行開發
+建議使用 [Tuist](https://tuist.dev) 產生的專案檔進行開發
 
 > Note: 使用產生 Xcode 專案開發以包含 `SwiftLint` 與 `SwiftFormater` 等工具
 
