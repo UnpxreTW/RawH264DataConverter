@@ -13,14 +13,12 @@ let package = Package(
     targets: [
         .target(
             name: "H264Decoder",
-            path: "Sources",
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            path: "Sources"
         ),
         .testTarget(
             name: "H264DecoderTests",
             dependencies: ["H264Decoder"],
-            path: "Tests",
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            path: "Tests"
         )
     ]
 )
