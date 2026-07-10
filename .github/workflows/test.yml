@@ -14,6 +14,9 @@ permissions:
 jobs:
   test:
     runs-on: macos-latest
+    env:
+      # SwiftStyleLint plugin：warning 升 error、直接 fail build
+      SWIFTSTYLELINT_STRICT: '1'
     steps:
       - uses: actions/checkout@v7
       - name: Pin Xcode 26.3
