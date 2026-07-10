@@ -60,7 +60,7 @@ v2 以 `actor` + `AsyncStream` 取代 v1 的 `delegate` 回呼介面：
 
 ## 開發
 
-純 SwiftPM 套件，開發流程不經 Tuist：
+純 SwiftPM 套件：
 
 ```shell
 swift build
