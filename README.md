@@ -60,24 +60,7 @@ v2 以 `actor` + `AsyncStream` 取代 v1 的 `delegate` 回呼介面：
 
 ## 開發
 
-建議使用 [Tuist](https://tuist.dev) 產生的專案檔進行開發
-
-> Note: 使用產生 Xcode 專案開發以包含 `SwiftLint` 與 `SwiftFormat` 等工具
-
-使用指令產生專案檔以進行開發：
-
-```shell
-tuist generate
-```
-
-
-> Note: 產生 Tuist 配置檔
->
-> ```shell
-> tuist edit
-> ```
-
-不需要 Tuist 時，最小驗證可直接走 SwiftPM（CI 即走此路徑）：
+純 SwiftPM 套件，開發流程不經 Tuist：
 
 ```shell
 swift build
