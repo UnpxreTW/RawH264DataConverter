@@ -1,1 +1,31 @@
-IyBTUERYLUZpbGVDb3B5cmlnaHRUZXh0OiAyMDI2IFVucHhyZSAoR2l0SHViOiBVbnB4cmVUVykKIyBTUERYLUxpY2Vuc2UtSWRlbnRpZmllcjogQXBhY2hlLTIuMAoKbmFtZTogQnVpbGQKCm9uOgogIHB1bGxfcmVxdWVzdDoKICBwdXNoOgogICAgYnJhbmNoZXM6IFttYWluXQoKcGVybWlzc2lvbnM6CiAgY29udGVudHM6IHJlYWQKCmpvYnM6CiAgYnVpbGQ6CiAgICBydW5zLW9uOiBtYWNvcy1sYXRlc3QKICAgIGVudjoKICAgICAgIyBTd2lmdFN0eWxlTGludCBwbHVnaW7vvJp3YXJuaW5nIOWNh+eOsGVycm9y44CB55u06o6l5oGvIGJ1aWxkCiAgICAgIFNXSUZUU1RZTEVMSU5UX1NUUklDVDogJzEnCiAgICBzdGVwczoKICAgICAgLSB1c2VzOiBhY3Rpb25zL2NoZWNrb3V0QHY3CiAgICAgIC0gbmFtZTogUGluIFhjb2RlIDI2LjMKICAgICAgICB1c2VzOiBtYXhpbS1sb2Jhbm92L3NldHVwLXhjb2RlQHYxCiAgICAgICAgd2l0aDoKICAgICAgICAgIHhjb2RlLXZlcnNpb246ICcyNi4zJwogICAgICAtIG5hbWU6IHN3aWZ0IGJ1aWxk77yIbWFjT1PvvIkKICAgICAgICBydW46IHN3aWZ0IGJ1aWxkCiAgICAgIC0gbmFtZTogeGNvZGVidWlsZO+8iGlPUyBTaW11bGF0b3LvvIkKICAgICAgICBydW46IHhjb2RlYnVpbGQgYnVpbGQgLXNjaGVtZSBIMjY0RGVjb2RlciAtZGVzdGluYXRpb24gJ2dlbmVyaWMvcGxhdGZvcm09aU9TIFNpbXVsYXRvcicKICAgICAgLSBuYW1lOiB4Y29kZWJ1aWxk77yIdHZPUyBTaW11bGF0b3LvvIkKICAgICAgICBydW46IHhjb2RlYnVpbGQgYnVpbGQgLXNjaGVtZSBIMjY0RGVjb2RlciAtZGVzdGluYXRpb24gJ2dlbmVyaWMvcGxhdGZvcm09dHZPUyBTaW11bGF0b3In
+# SPDX-FileCopyrightText: 2026 Unpxre (GitHub: UnpxreTW)
+# SPDX-License-Identifier: Apache-2.0
+
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    env:
+      # SwiftStyleLint plugin：warning 升 error、直接 fail build
+      SWIFTSTYLELINT_STRICT: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - name: Pin Xcode 26.3
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.3'
+      - name: swift build（macOS）
+        run: swift build
+      - name: xcodebuild（iOS Simulator）
+        run: xcodebuild build -scheme H264Decoder -destination 'generic/platform=iOS Simulator'
+      - name: xcodebuild（tvOS Simulator）
+        run: xcodebuild build -scheme H264Decoder -destination 'generic/platform=tvOS Simulator'
