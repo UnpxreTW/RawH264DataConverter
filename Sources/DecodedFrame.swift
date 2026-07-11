@@ -17,10 +17,10 @@ import CoreVideo
 /// 屬單一所有權跨 isolation 移交，可安全送出。
 public enum DecodedFrame: @unchecked Sendable {
 
-    /// `.CMSampleBuffer` 模式輸出：可直接餵 `AVSampleBufferDisplayLayer` 顯示。
-    case sampleBuffer(CMSampleBuffer)
+	/// `.CMSampleBuffer` 模式輸出：可直接餵 `AVSampleBufferDisplayLayer` 顯示。
+	case sampleBuffer(CMSampleBuffer)
 
-    /// `.CVPixelBuffer` 模式輸出：經 `VTDecompressionSession` 解出的像素緩衝。
-    case pixelBuffer(CVPixelBuffer)
+	/// `.CVPixelBuffer` 模式輸出：經 `VTDecompressionSession` 解出的像素緩衝。
+	case pixelBuffer(CVPixelBuffer)
 }
 #endif
