@@ -26,6 +26,6 @@ jobs:
       - name: swift build（macOS）
         run: swift build
       - name: xcodebuild（iOS Simulator）
-        run: xcodebuild build -scheme H264Decoder -destination 'generic/platform=iOS Simulator'
+        run: xcodebuild build -scheme RawH264DataConverter -destination 'generic/platform=iOS Simulator' -skipPackagePluginValidation
       - name: xcodebuild（tvOS Simulator）
-        run: xcodebuild build -scheme H264Decoder -destination 'generic/platform=tvOS Simulator'
+        run: xcodebuild build -scheme RawH264DataConverter -destination 'generic/platform=tvOS Simulator' -skipPackagePluginValidation
