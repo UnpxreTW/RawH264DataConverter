@@ -1,6 +1,6 @@
 # RawH264DataConverter
 
-將裸 H.264 Annex-B 位元流轉換為 `CMSampleBuffer` 或 `CVPixelBuffer`，透過 VideoToolbox 解碼。
+將 raw H.264 Annex-B 位元流轉換為 `CMSampleBuffer` 或 `CVPixelBuffer`，透過 VideoToolbox 解碼。
 
 ## 需求
 
@@ -19,7 +19,7 @@
 
 ## 使用
 
-`H264Decoder` 是 `actor`：把裸 H.264 Annex-B 位元流餵進 `enqueue(_:)`，解碼結果從
+`H264Decoder` 是 `actor`：把 raw H.264 Annex-B 位元流餵進 `enqueue(_:)`，解碼結果從
 `frames`（`AsyncStream<DecodedFrame>`）以 `for await` 拉取消費。
 
 ```swift
@@ -36,7 +36,7 @@ Task {
     }
 }
 
-// 收到網路 / 檔案來源的裸 H.264 Annex-B 資料時：
+// 收到網路 / 檔案來源的 raw H.264 Annex-B 資料時：
 await decoder.enqueue(rawH264Data)
 ```
 
@@ -60,19 +60,9 @@ v2 以 `actor` + `AsyncStream` 取代 v1 的 `delegate` 回呼介面：
 
 ## 開發
 
-建議使用 [Tuist](https://tuist.dev) 產生的專案檔進行開發
-
-> Note: 使用產生 Xcode 專案開發以包含 `SwiftLint` 與 `SwiftFormat` 等工具
-
-使用指令產生專案檔以進行開發：
+純 SwiftPM 套件：
 
 ```shell
-tuist generate
+swift build
+swift test
 ```
-
-
-> Note: 產生 Tuist 配置檔
->
-> ```shell
-> tuist edit
-> ```
