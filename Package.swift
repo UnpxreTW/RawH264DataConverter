@@ -10,7 +10,7 @@ let package = Package(
         .library(name: "H264Decoder", targets: ["H264Decoder"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/UnpxreTW/SwiftStyleKit.git", exact: "2.0.1"),
+        .package(url: "https://github.com/UnpxreTW/SwiftStyleKit.git", exact: "2.1.0"),
     ],
     targets: [
         .target(
