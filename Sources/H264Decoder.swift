@@ -43,6 +43,9 @@ public actor H264Decoder {
 	///
 	/// 緩衝政策為 `.bufferingNewest(1)`：消費端跟不上時只保留最新一格、丟棄舊格，
 	/// 貼合即時顯示（live-view）低延遲定位、避免影格無上限堆積導致記憶體膨脹。
+	///
+	/// - Note: `frames` 為單一消費者（single-consumer）`AsyncStream`：僅支援一個 `for await`
+	///   迴圈接收影格。若同時開第二個 `for await`，該迴圈只會拿到已結束的空串流，收不到任何影格。
 	public nonisolated let frames: AsyncStream<DecodedFrame>
 
 	/// 餵入一段 Annex-B 位元流（可跨多個 NAL access unit），逐包解碼後吐進 ``frames``。

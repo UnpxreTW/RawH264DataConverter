@@ -48,6 +48,10 @@ await decoder.enqueue(rawH264Data)
 `frames` 採 `.bufferingNewest(1)` 緩衝政策：消費端跟不上時只保留最新一格、捨棄較舊的格，
 貼合即時顯示（live-view）場景的低延遲定位；`enqueue(_:)` 於單次呼叫內解出多格時亦適用同一政策。
 
+> **Important**：`frames` 為單一消費者（single-consumer）`AsyncStream`，僅支援一個 `for await`
+> 迴圈接收影格。若同時開第二個 `for await frame in decoder.frames`，該迴圈只會拿到已結束的空串流、
+> 收不到任何影格。
+
 ## 從 v1 遷移
 
 v2 以 `actor` + `AsyncStream` 取代 v1 的 `delegate` 回呼介面：
